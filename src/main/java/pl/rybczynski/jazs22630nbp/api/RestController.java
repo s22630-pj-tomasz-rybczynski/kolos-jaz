@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import pl.rybczynski.jazs22630nbp.model.CurrencyDbRow;
 import pl.rybczynski.jazs22630nbp.service.CurrencyService;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @org.springframework.web.bind.annotation.RestController
@@ -18,7 +17,7 @@ public class RestController {
     }
 
     @GetMapping
-    public ResponseEntity<CurrencyDbRow> getCurrency(@RequestParam(value = "price") BigDecimal price, @RequestParam(value = "fromDate") LocalDate fromDate, @RequestParam(value = "toDate") LocalDate toDate) {
+    public ResponseEntity<CurrencyDbRow> getCurrency(@RequestParam(value = "price") Double price, @RequestParam(value = "fromDate") LocalDate fromDate, @RequestParam(value = "toDate") LocalDate toDate) {
         return ResponseEntity.ok(currencyService.getCurrency(price, fromDate, toDate));
     }
 }

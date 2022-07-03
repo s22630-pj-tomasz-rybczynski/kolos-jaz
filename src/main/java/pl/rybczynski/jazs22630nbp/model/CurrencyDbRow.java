@@ -8,6 +8,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+
+//Każdorazowe wykonanie zapytania ma zapisać w bazie danych następujące informacje: id
+//        (automatycznie przypisywane), średnią cenę dla jakiej zostało wykonane zapytanie, datę
+//        rozpoczynającą przedział, datę kończącą przedział, liczbę walut, data oraz godzina
+//        zapytania.
+
 @Entity
 public class CurrencyDbRow {
     public Long getId() {
