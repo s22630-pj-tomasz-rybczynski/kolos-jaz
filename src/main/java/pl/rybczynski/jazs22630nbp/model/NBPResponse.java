@@ -9,6 +9,9 @@ public class NBPResponse {
         this.rates = rates;
     }
 
+    public NBPResponse() {
+    }
+
     public List<Currency> getRates() {
         return rates;
     }

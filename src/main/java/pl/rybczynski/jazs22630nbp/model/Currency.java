@@ -26,4 +26,12 @@ public class Currency {
     public void setMid(Double mid) {
         this.mid = mid;
     }
+
+    @Override
+    public String toString() {
+        return "Currency{" +
+                "code='" + code + '\'' +
+                ", mid=" + mid +
+                '}';
+    }
 }

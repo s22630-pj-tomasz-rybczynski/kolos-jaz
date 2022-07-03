@@ -9,11 +9,14 @@ import pl.rybczynski.jazs22630nbp.model.CurrencyResponse;
 import pl.rybczynski.jazs22630nbp.model.NBPResponse;
 import pl.rybczynski.jazs22630nbp.repository.CurrencyRepository;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 @Service
 public class CurrencyService {
@@ -26,31 +29,27 @@ public class CurrencyService {
         this.repo = repo;
     }
 
-//    [
-//    {
-//        "table":"A",
-//            "no":"199/A/NBP/2020",
-//            "effectiveDate":"2020-10-12",
-//            "rates":[
-//        {
-//            "currency":"bat (Tajlandia)",
-//                "code":"THB",
-//                "mid":0.1217
-//        },
+    private static <T> Predicate<T> distinctByKey(
+            Function<? super T, ?> keyExtractor) {
+
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
 
     private final String url = "https://api.nbp.pl/api/exchangerates/tables/a";
 
     public CurrencyResponse getCurrency(Double price, LocalDate fromDate, LocalDate toDate) {
-        NBPResponse[] res = client.getForObject(url + "/{fromDate}/{toDate}?format=json", NBPResponse[].class, fromDate, toDate);
-        List<Currency> currencies = Arrays.stream(res).toList().stream().flatMap(nbpRes -> nbpRes.getRates().stream().filter(currency -> price > currency.getMid())).toList();
-//        BigDecimal avg = BigDecimal.valueOf(res.getRates().stream().map(Currency::getMid).mapToDouble(s -> s).average().orElseThrow())
-//                .round(new MathContext(3));
+        ResponseEntity<NBPResponse[]> res = client.getForEntity(url + "/{fromDate}/{toDate}?format=json", NBPResponse[].class, fromDate, toDate);
 
-//        CurrencyDbRow response = new CurrencyDbRow(avg, code, from, to);
-//
-//        repo.save(response);
+        List<Currency> currencies = Arrays.stream(Objects.requireNonNull(res.getBody())).toList().stream()
+                .flatMap(nbpRes -> nbpRes.getRates().stream().filter(currency -> price < currency.getMid()))
+                .filter(distinctByKey(Currency::getCode)).toList();
 
-        return response;
+        Integer amountOfCurrencies = currencies.size();
+
+        repo.save(new CurrencyDbRow(price, currencies.size(), fromDate, toDate));
+
+        return new CurrencyResponse(amountOfCurrencies);
     }
 
 }
